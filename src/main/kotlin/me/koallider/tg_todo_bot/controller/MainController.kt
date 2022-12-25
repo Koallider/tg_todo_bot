@@ -1,22 +1,23 @@
-package me.koallider.tg_todo_bot
+package me.koallider.tg_todo_bot.controller
 
-import com.github.kshashov.telegram.api.MessageType
 import com.github.kshashov.telegram.api.TelegramMvcController
-import com.github.kshashov.telegram.api.TelegramRequest
 import com.github.kshashov.telegram.api.bind.annotation.BotController
 import com.github.kshashov.telegram.api.bind.annotation.BotPathVariable
-import com.github.kshashov.telegram.api.bind.annotation.BotRequest
 import com.github.kshashov.telegram.api.bind.annotation.request.MessageRequest
 import com.pengrad.telegrambot.model.Chat
-import com.pengrad.telegrambot.model.User
-import com.pengrad.telegrambot.request.BaseRequest
-import com.pengrad.telegrambot.request.SendMessage
+import com.pengrad.telegrambot.model.Message
+import me.koallider.tg_todo_bot.dao.ChatRepository
+import me.koallider.tg_todo_bot.model.TodoChat
+import me.koallider.tg_todo_bot.service.TodoService
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.stereotype.Component
 
 
 @BotController
 class MainController : TelegramMvcController {
+
+    @Autowired
+    lateinit var todoService: TodoService
 
     @Value("\${tg.apiKey}")
     private lateinit var token: String
@@ -25,8 +26,8 @@ class MainController : TelegramMvcController {
         return token
     }
 
-    @MessageRequest("{task}")
-    fun pingPong(@BotPathVariable("task") task: String): String {
-        return task.uppercase()
+    @MessageRequest
+    fun handleMessage(chat: Chat, message: Message): String {
+        return todoService.handleMessage(chat, message)
     }
 }
