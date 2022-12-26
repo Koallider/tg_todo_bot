@@ -2,12 +2,11 @@ package me.koallider.tg_todo_bot.controller
 
 import com.github.kshashov.telegram.api.TelegramMvcController
 import com.github.kshashov.telegram.api.bind.annotation.BotController
-import com.github.kshashov.telegram.api.bind.annotation.BotPathVariable
 import com.github.kshashov.telegram.api.bind.annotation.request.MessageRequest
+import com.pengrad.telegrambot.TelegramBot
 import com.pengrad.telegrambot.model.Chat
 import com.pengrad.telegrambot.model.Message
-import me.koallider.tg_todo_bot.dao.ChatRepository
-import me.koallider.tg_todo_bot.model.TodoChat
+import com.pengrad.telegrambot.request.SendMessage
 import me.koallider.tg_todo_bot.service.TodoService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -29,5 +28,20 @@ class MainController : TelegramMvcController {
     @MessageRequest
     fun handleMessage(chat: Chat, message: Message): String {
         return todoService.handleMessage(chat, message)
+    }
+
+    @MessageRequest("/list")
+    fun handleList(chat: Chat, bot: TelegramBot): String? {
+        val taskList = todoService.getTaskList(chat)
+        return if (taskList.isEmpty()) {
+            "TODO list is empty"
+        } else {
+            taskList.forEachIndexed { index, messageId ->
+                val message = SendMessage(chat.id(), "${index + 1}")
+                message.replyToMessageId(messageId)
+                bot.execute(message)
+            }
+            return null
+        }
     }
 }
