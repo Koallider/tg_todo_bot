@@ -19,6 +19,7 @@ class TodoServiceImpl : TodoService {
 
     override fun handleMessage(chat: Chat, message: Message): String {
         val todoChat = chatRepository.findByChatId(chat.id()) ?: TodoChat(chat.id(), ArrayList())
+        val replyRegex = """\d*. id: (\d*)""".toRegex()
         if (message.replyToMessage() == null) {
             todoChat.todoList.add(message.messageId())
             chatRepository.save(todoChat)
@@ -28,6 +29,15 @@ class TodoServiceImpl : TodoService {
             return if (todoChat.todoList.remove(messageId)) {
                 chatRepository.save(todoChat)
                 "Task \"${message.replyToMessage().text()}\" is finished"
+            } else if (message.replyToMessage().text().matches(replyRegex)) {
+                val regexMessageId =
+                    replyRegex.find(message.replyToMessage().text())?.groups?.get(1)?.value?.toInt() ?: 0
+                if (todoChat.todoList.remove(regexMessageId)) {
+                    chatRepository.save(todoChat)
+                    "Task with id $regexMessageId is finished"
+                } else {
+                    "This task is finished or it's not a task"
+                }
             } else {
                 "This task is finished or it's not a task"
             }

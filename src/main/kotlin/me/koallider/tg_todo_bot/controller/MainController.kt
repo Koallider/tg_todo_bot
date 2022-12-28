@@ -37,7 +37,7 @@ class MainController : TelegramMvcController {
             "TODO list is empty"
         } else {
             taskList.forEachIndexed { index, messageId ->
-                val message = SendMessage(chat.id(), "${index + 1}")
+                val message = SendMessage(chat.id(), "${index + 1}. id: $messageId")
                 message.replyToMessageId(messageId)
                 bot.execute(message)
             }
