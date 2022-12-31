@@ -27,7 +27,12 @@ class MainController : TelegramMvcController {
 
     @MessageRequest
     fun handleMessage(chat: Chat, message: Message): String {
-        return todoService.handleMessage(chat, message)
+        return todoService.handleTaskMessage(chat, message)
+    }
+
+    @MessageRequest("done")
+    fun handleDone(chat: Chat, message: Message): String {
+        return todoService.handleDoneMessage(chat, message)
     }
 
     @MessageRequest("/list")
@@ -43,5 +48,11 @@ class MainController : TelegramMvcController {
             }
             return null
         }
+    }
+
+    @MessageRequest("/start")
+    fun handleStart(): String? {
+        return "Welcome to TODO bot. Send any message to add it to the TODO list. " +
+                "Reply \"done\" to the task to finish it and remove from the list."
     }
 }
